@@ -43,30 +43,61 @@ export const loginUser = async (req, res) => {
     if (!email || !password) {
       return res.status(400).json({ message: 'Email and password are required' });
     }
+
     const user = await prisma.user.findUnique({ where: { email } });
-    
+
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
+
     const isPasswordValid = await bcrypt.compare(password, user.password);
-    
+
     if (!isPasswordValid) {
       return res.status(401).json({ message: 'Invalid password' });
     }
 
-    const { password: _, ...userWithoutPassword } = user;
-
     const token = generateToken({ id: user.id, email: user.email });
 
-    res.status(200).json({ 
-      message: 'User logged in successfully', 
-      user: userWithoutPassword,
-      token: token
+    const cookieOptions = {
+      httpOnly: true,        
+      secure: false,          
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000 
+    };
+
+    res.cookie("token", token, cookieOptions);
+
+    const { password: _, ...userWithoutPassword } = user;
+
+    return res.status(200).json({
+      message: "Logged in successfully",
+      user: userWithoutPassword
     });
+
   } catch (error) {
-    res.status(500).json({ 
-      message: 'Error logging in user',
-      error: error.message 
+    return res.status(500).json({
+      message: "Error logging in user",
+      error: error.message
+    });
+  }
+};
+
+export const logoutUser = async (req, res) => {
+  try {
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: true,       // set to false on localhost
+      sameSite: "strict",
+    });
+
+    return res.status(200).json({
+      message: "Logged out successfully"
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      message: "Error logging out",
+      error: error.message
     });
   }
 };
