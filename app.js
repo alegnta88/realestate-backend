@@ -15,7 +15,7 @@ app.get('/', (req, res) => {
   res.send('Hello from Node.js!');
 });
 
-app.use('/api/v1/auth', authRouter);
+app.use('/api/auth', authRouter);
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
