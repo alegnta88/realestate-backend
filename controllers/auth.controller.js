@@ -1,5 +1,7 @@
 import bcrypt from 'bcrypt';
 import prisma from '../prisma.config.js';
+import jwt from 'jsonwebtoken';
+import { generateToken } from '../utils/jwt.js';
 
 export const registerUser = async (req, res) => {
   try {
@@ -53,12 +55,14 @@ export const loginUser = async (req, res) => {
     }
 
     const { password: _, ...userWithoutPassword } = user;
-    
+
+    const token = generateToken({ id: user.id, email: user.email });
+
     res.status(200).json({ 
       message: 'User logged in successfully', 
-      user: userWithoutPassword 
+      user: userWithoutPassword,
+      token: token
     });
-
   } catch (error) {
     res.status(500).json({ 
       message: 'Error logging in user',
