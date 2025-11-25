@@ -6,12 +6,11 @@ export const registerUser = async (req, res) => {
     const { username, email, password } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = await prisma.user.create({
-      
       data: {
         username, email, password: hashedPassword
       },
     });
-    console.log('User registered:', newUser);
+    res.status(201).json({ message: 'User registered successfully', user: newUser });
     
   } catch (error) {
     res.status(500).json({ message: 'Error registering user', error });
