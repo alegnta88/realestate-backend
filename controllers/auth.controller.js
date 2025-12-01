@@ -6,10 +6,13 @@ import { generateToken } from '../utils/jwt.js';
 export const registerUser = async (req, res) => {
   try {
     const { username, email, password } = req.body;
+    console.log('Received registration data:', req.body);
     
     if (!username || !email || !password) {
       return res.status(400).json({ message: 'All fields are required' });
     }
+
+    console.log('Registering user with email:', email);
     
     const hashedPassword = await bcrypt.hash(password, 10);
     
